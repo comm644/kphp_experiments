@@ -1,7 +1,7 @@
 How to create self own Reflection for KPHP
 Not faster but work.
 
-support: 
+Supports next calls: 
 
 instead:
 <pre>
