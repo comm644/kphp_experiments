@@ -15,7 +15,7 @@ make trait stub for generator:
 trait A_reflection
 {
 }
-<pre>
+</pre>
 
 after trait generation will be available next calls: 
 
