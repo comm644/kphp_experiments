@@ -1,7 +1,23 @@
 How to create self own Reflection for KPHP
 Not faster but work.
 
-Supports next calls: 
+Enable reflection:
+<pre>
+class A
+{
+  use A_refection;
+...
+}
+</pre>
+
+make trait stub for generator:
+<pre>
+trait A_reflection
+{
+}
+</pre>
+
+after trait generation will be available next calls: 
 
 instead:
 <pre>
@@ -9,7 +25,7 @@ instead:
 </pre>
 use:
 <pre>
- ClassName_reflection::setPropertyValue($object, $name, 'other value');
+ $object->setPropertyValue($name, 'other value');
 </pre>
 
 instead:
@@ -19,7 +35,17 @@ instead:
 
 use:
 <pre>
- echo ClassName_reflection::getPropertyValue($object, $name);
+ echo $object->getPropertyValue($name);
+</pre>
+
+
+Decode json:
+<pre>
+$jsonArray = json_decode('{"name":"text", "value":10}', true );
+foreach($jsonArray as $key  => $value ) {
+        //my own reflection
+        $object->setPropertyValue((string)$key, $value );
+}
 </pre>
 
 
