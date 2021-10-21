@@ -19,15 +19,23 @@ $object = new A();
 //}
 
 
+echo "\n\ninstance_to_array:\n";
 foreach( instance_to_array($object) as $key =>$value ) {
 	echo "$key  == $value\n";
 }
 
-//my own reflection
-A_reflection::setPropertyValue($object, "name", "other string");
+echo "\n\nimport from json with simple reflection:\n";
+$jsonArray = json_decode('{"name":"text", "value":10}', true );
+foreach($jsonArray as $key  => $value ) {
+	//my own reflection
+	$object->setPropertyValue((string)$key, $value );
+}
 
-echo "prop value: " . A_reflection::getPropertyValue($object, "name") ."\n";
 
+echo "\n\nget value via reflection:\n";
+echo "prop value: " . $object->getPropertyValue( "name") ."\n";
+
+echo "instance_to_array with updated object:\n";
 foreach( instance_to_array($object) as $key =>$value ) {
 	echo "$key  == $value\n";
 }
