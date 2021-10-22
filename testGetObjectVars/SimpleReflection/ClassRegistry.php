@@ -42,13 +42,13 @@ class ClassRegistry
 	}
 
 	/**
-	 * @param string $name
+	 * @param string $className
 	 * @return ICanReflection
 	 */
-	public static function createReflection(string $name, object $instance)
+	public static function createReflection(string $className, object $instance)
 	{
 		/** @var callable(object):ICanReflection $handler */
-		$handler = self::$createReflectionHandlers[$name];
+		$handler = self::$createReflectionHandlers[$className. "_reflection"];
 		return $handler($instance);
 	}
 	public static function init()

@@ -3,8 +3,6 @@
 
 namespace SimpleReflection;
 
-use SimpleReflection\MixedValue;
-
 class ScalarValue extends MixedValue
 {
 	/** @var  mixed */

@@ -11,10 +11,10 @@ use SimpleReflection\TypeName;
 class JsonParser
 {
 
-	public static function parse($jsonArray, ICanJson $object, $prefix = '')
+	public static function parse($jsonArray, object $object, $prefix = '')
 	{
 		/** @var ICanReflection $ref */
-		$ref = ClassRegistry::createReflection(get_class($object) . "_reflection", $object);
+		$ref = ClassRegistry::createReflection(get_class($object) , $object);
 
 		foreach ($jsonArray as $key => $value) {
 			//my own reflection
@@ -49,11 +49,11 @@ class JsonParser
 	/**
 	 * @param TypeName $propType
 	 * @param $json
-	 * @return ICanJson
+	 * @return object
 	 */
-	public static function parseObjectValue(TypeName $propType, $json): ICanJson
+	public static function parseObjectValue(TypeName $propType, $json): object
 	{
-		/** @var ICanJson $propInstance */
+		/** @var object  $propInstance */
 		$propInstance = ClassRegistry::createClass($propType->name);
 		self::parse($json, $propInstance, '  ');
 		return $propInstance;
@@ -62,22 +62,23 @@ class JsonParser
 	/**
 	 * @param TypeName $propType
 	 * @param array $jsonArray
-	 * @return ICanJson[]
+	 * @return object []
 	 */
 	public static function parseObjectArray(TypeName $propType, array $jsonArray): array
 	{
-		/** @var ICanJson[] $propArray */
+		/** @var object [] $propArray */
 		$propArray = [];
 		/** @var array|mixed $jsonValue */
 		foreach ($jsonArray as $jsonValue) {
-			/** @var ICanJson $propInstance */
+			/** @var object  $propInstance */
 			$propInstance = self::parseObjectValue($propType, $jsonValue);
 			$propArray[] = $propInstance;
 		}
 		return $propArray;
 	}
 
-	public static function jsonDecodeObject(string $json, string $className) : ICanJson
+
+	public static function jsonDecodeObject(string $json, string $className) : object
 	{
 		$propType = new TypeName($className, TypeName::Object);
 		$array = json_decode($json, true);
