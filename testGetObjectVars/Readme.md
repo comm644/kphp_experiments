@@ -17,7 +17,7 @@ instead:
 use:
 <pre>
 
-$ref = ClassRegistry::createReflection(get_class($object) . "_reflection", $object);
+$ref = ClassRegistry::createReflection(get_class($object), $object);
 $ref->setPropertyValue($name, 'other value');
 </pre>
 
@@ -28,7 +28,7 @@ instead:
 
 use:
 <pre>
-$ref = ClassRegistry::createReflection(get_class($object) . "_reflection", $object);
+$ref = ClassRegistry::createReflection(get_class($object), $object);
 echo $ref->getPropertyValue($name);
 </pre>
 
