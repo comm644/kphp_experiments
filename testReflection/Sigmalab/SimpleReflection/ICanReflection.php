@@ -38,15 +38,59 @@ interface ICanReflection
 
 	/**
 	 * @param string $name
-	 * @param \Sigmalab\SimpleReflection\IReflectedObject $value
+	 * @return string
 	 */
-	public function set_as_object(string $name, \Sigmalab\SimpleReflection\IReflectedObject $value):void;
+	public function get_as_string(string  $name):string;
 
 	/**
 	 * @param string $name
-	 * @param \Sigmalab\SimpleReflection\IReflectedObject[] $value
+	 * @return int
+	 */
+	public function get_as_int(string  $name):int;
+
+	/**
+	 * @param string $name
+	 * @return float
+	 */
+	public function get_as_float(string  $name):float;
+
+	/**
+	 * @param string $name
+	 * @return bool
+	 */
+	public function get_as_bool(string  $name):bool ;
+
+	/**
+	 * @param string $name
+	 * @param $value
+	 * @return mixed
+	 */
+	public function get_as_mixed(string $name);
+
+	/**
+	 * @param string $name
+	 * @param IReflectedObject $value
+	 */
+	public function set_as_object(string $name, IReflectedObject $value):void;
+
+	/**
+	 * @param string $name
+	 * @return ?IReflectedObject
+	 */
+	public function get_as_object(string $name): ?IReflectedObject;
+
+	/**
+	 * @param string $name
+	 * @param IReflectedObject[] $value
 	 * @throws Exception
 	 */
 	public function set_as_objects(string $name, array $value):void;
+
+	/**
+	 * @param string $name
+	 * @return \Sigmalab\SimpleReflection\IReflectedObject[]
+	 * @throws Exception
+	 */
+	public function get_as_objects(string $name):array;
 
 }

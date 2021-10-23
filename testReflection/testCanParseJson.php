@@ -114,35 +114,101 @@ echo get_class($objectA);
 
 $ref = ClassRegistry::createReflection(A::class, $objectA);
 
-//very fast - without boxing
-$ref->set_as_string("name", "some string");
-$ref->set_as_int("value", 20);
+#region Setters
+{
+	//very fast - without boxing
+	$ref->set_as_string("name", "some string");
+	$ref->set_as_int("value", 20);
 
-//fast - with boxing
-$ref->set_as_mixed("name", "some string");
-$ref->set_as_mixed("value", 10);
-$ref->set_as_mixed("boolValue", true);
-$ref->set_as_mixed("myarray", [1, 2, 3]);
+	//fast - with boxing
+	$ref->set_as_mixed("name", "some string");
+	$ref->set_as_mixed("value", 10);
+	$ref->set_as_mixed("boolValue", true);
+	$ref->set_as_mixed("myarray", [1, 2, 3]);
 
-//fast - without boxing (only dynamic_cast<>)
-$ref->set_as_object("valueB", new B());
-$ref->set_as_object("valueA", new A());
+	//fast - without boxing (only dynamic_cast<>)
+	$ref->set_as_object("valueB", new B());
+	$ref->set_as_object("valueA", new A());
 
-//not so fast, array copying to target property
-$mixed = [new B, new B];
-$ref->set_as_objects("arrayB", $mixed);
+	//not so fast, array copying to target property
+	$mixed = [new B, new B];
+	$ref->set_as_objects("arrayB", $mixed);
 
-//slow - double unboxing (mixed + ValueScalar), allocating memory for ValueScalar, check instanceof
-$ref->setPropertyValue("name", new ValueScalar("slow"));
+	//slow - double unboxing (mixed + ValueScalar), allocating memory for ValueScalar, check instanceof
+	$ref->setPropertyValue("name", new ValueScalar("slow"));
 
-//not so fast - inline unboxing (ValueObject), allocating memory for ValueScalar, dynamic_cast<>, check instanceof
-$ref->setPropertyValue("valueB", new ValueObject(new B));
+	//not so fast - inline unboxing (ValueObject), allocating memory for ValueScalar, dynamic_cast<>, check instanceof
+	$ref->setPropertyValue("valueB", new ValueObject(new B));
 
-//very slow - array copying, allocating memory for ValueObjects, dynamic_cast<>, check instanceof
-$ref->setPropertyValue("arrayB", new ValueObjects([new B, new B]));
+	//very slow - array copying, allocating memory for ValueObjects, dynamic_cast<>, check instanceof
+	$ref->setPropertyValue("arrayB", new ValueObjects([new B, new B]));
 
-echo "\n\ndump\n";
-dump($objectA);
+	echo "\n\ndump\n";
+	echo json_encode(instance_to_array($object));
+	dump($objectA);
+}
+#endregion
+
+
+#region Getters
+{
+	//very fast - without boxing
+	echo $ref->get_as_string("name") . "\n";
+	echo $ref->get_as_int("value") . "\n";
+
+	//fast - with boxing
+	echo $ref->get_as_mixed("name") . "\n";
+	echo $ref->get_as_mixed("value") . "\n";
+	echo $ref->get_as_mixed("boolValue") . "\n";
+	$array = $ref->get_as_mixed("myarray") ;
+	foreach ($array as $value){
+		echo "  $value\n";
+	}
+
+	{
+		//fast - without boxing (only dynamic_cast<>)
+		/** @var B $objectB1 */
+		$objectB1 = instance_cast($ref->get_as_object("valueB"), B::class);
+		echo $objectB1->other . "\n";
+
+		/** @var A $objectA1 */
+		$objectA1 = instance_cast($ref->get_as_object("valueA"), A::class);
+
+		echo $objectA1->name . "\n";
+		dump($objectB1);
+	}
+
+	//not so fast, array copying to target property
+	$objs = $ref->get_as_objects("arrayB");
+
+	{
+		//slow - double unboxing (mixed + ValueScalar), allocating memory for ValueScalar, check instanceof
+		/** @var ValueScalar $vScalar */
+		$vScalar = instance_cast($ref->getPropertyValue("name"), ValueScalar::class);
+		echo $vScalar->get_as_string();
+	}
+
+	{
+		//not so fast - inline unboxing (ValueObject), allocating memory for ValueScalar, dynamic_cast<>, check instanceof
+		/** @var ValueObject $vObjectB */
+		$vObjectB = instance_cast($ref->getPropertyValue("valueB"), ValueObject::class);
+		$objectBB = instance_cast($vObjectB->getValue(), B::class);
+		echo $objectBB->other;
+
+		/** @var A $objectAA */
+		/** @var ValueObject $vObjectA */
+		$vObjectA = instance_cast($ref->getPropertyValue("valueA"), ValueObject::class);
+		$objectAA = instance_cast($vObjectA->getValue(), A::class);
+		echo $objectAA->name;
+	}
+
+
+	//very slow - array copying, allocating memory for ValueObjects, dynamic_cast<>, check instanceof
+	$ref->getPropertyValue("arrayB");
+
+}
+#endregion
+
 
 //KPHP not support this
 //$className = "A";

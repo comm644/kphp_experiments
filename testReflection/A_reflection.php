@@ -185,7 +185,19 @@ class A_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	{
 		switch ($name) {
 			case 'name': $this->instance->name  = $value; break;
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
+		}
+	}
+	/**
+	 * @param string $name
+	 * @return string
+	 * @throws Exception
+	 */
+	public function get_as_string(string  $name):string
+	{
+		switch ($name) {
+			case 'name': return $this->instance->name;
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
 	/**
@@ -197,7 +209,19 @@ class A_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	{
 		switch ($name) {
 			case 'value': $this->instance->value  = $value; break;
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
+		}
+	}
+	/**
+	 * @param string $name
+	 * @return int
+	 * @throws Exception
+	 */
+	public function get_as_int(string  $name):int
+	{
+		switch ($name) {
+			case 'value': return $this->instance->value;
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
 	/**
@@ -209,7 +233,19 @@ class A_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	{
 		switch ($name) {
 			case 'floatValue': $this->instance->floatValue  = $value; break;
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
+		}
+	}
+	/**
+	 * @param string $name
+	 * @return float
+	 * @throws Exception
+	 */
+	public function get_as_float(string  $name):float
+	{
+		switch ($name) {
+			case 'floatValue': return $this->instance->floatValue;
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
 	/**
@@ -221,7 +257,18 @@ class A_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	{
 		switch ($name) {
 			case 'boolValue': $this->instance->boolValue  = $value; break;
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
+		}
+	}
+	/**
+	 * @param string $name
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function get_as_bool(string  $name):bool
+	{
+		switch ($name) {
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
 	/**
@@ -233,7 +280,7 @@ class A_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 		switch ($name) {
 			case 'nullableInt': $this->instance->nullableInt  = null; break;
 			case 'valueA': $this->instance->valueA  = null; break;
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
 	/**
@@ -269,7 +316,31 @@ class A_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 					$this->instance->boolArray[$arrayKey] = (bool)$item;
 				}
 				break;
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
+		}
+	}
+	/**
+	 * @param string $name
+	 * @return mixed
+	 * @throws Exception
+	 */
+	public function get_as_mixed(string $name)
+	{
+		switch ($name) {
+			case 'name': return $this->instance->name; break;
+			case 'value': return $this->instance->value; break;
+			case 'nullableInt': return $this->instance->nullableInt; break;
+			case 'floatValue': return $this->instance->floatValue; break;
+			case 'boolValue': return $this->instance->boolValue; break;
+			case 'myarray': return $this->instance->myarray;
+				break;
+			case 'stringArray': return $this->instance->stringArray;
+				break;
+			case 'floatArray': return $this->instance->floatArray;
+				break;
+			case 'boolArray': return $this->instance->boolArray;
+				break;
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
 	/**
@@ -280,13 +351,26 @@ class A_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	public function set_as_object(string $name, \Sigmalab\SimpleReflection\IReflectedObject $value):void
 	{
 		switch ($name) {
-
-			case 'valueB': $this->instance->valueB = instance_cast($value, B::class); break;			 
-
-			case 'valueA': $this->instance->valueA = instance_cast($value, A::class); break;			 
-			default: throw new Exception("invalid argument");
+			case 'valueB': $this->instance->valueB = instance_cast($value, B::class); break;
+			case 'valueA': $this->instance->valueA = instance_cast($value, A::class); break;
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
+
+	/**
+	 * @param string $name
+	 * @return \Sigmalab\SimpleReflection\IReflectedObject 
+	 * @throws Exception
+	 */
+	public function get_as_object(string $name):?\Sigmalab\SimpleReflection\IReflectedObject 
+	{
+		switch ($name) {
+			case 'valueB': return $this->instance->valueB;
+			case 'valueA': return $this->instance->valueA;
+			default: throw new Exception("invalid argument: $name");
+		}
+	}
+
 	/**
 	 * @param string $name
 	 * @param \Sigmalab\SimpleReflection\IReflectedObject[] $value
@@ -301,7 +385,17 @@ class A_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 					$this->instance->arrayB[$arrayKey] = instance_cast($item, B::class); ;
 				}
 				break;
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
 		}
+	}
+
+	/**
+	 * @param string $name
+	 * @return \Sigmalab\SimpleReflection\IReflectedObject[] 
+	 * @throws Exception
+	 */
+	public function get_as_objects(string $name):array
+	{
+return []; /* exception will be prefer , but bug. */
 	}
 }

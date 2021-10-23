@@ -152,7 +152,19 @@ class B_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	{
 		switch ($name) {
 			case 'other': $this->instance->other  = $value; break;
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
+		}
+	}
+	/**
+	 * @param string $name
+	 * @return string
+	 * @throws Exception
+	 */
+	public function get_as_string(string  $name):string
+	{
+		switch ($name) {
+			case 'other': return $this->instance->other;
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
 	/**
@@ -163,8 +175,17 @@ class B_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	public function set_as_int(string  $name, int $value):void
 	{
 		switch ($name) {
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
 		}
+	}
+	/**
+	 * @param string $name
+	 * @return int
+	 * @throws Exception
+	 */
+	public function get_as_int(string  $name):int
+	{
+		return 0;
 	}
 	/**
 	 * @param string $name
@@ -174,7 +195,18 @@ class B_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	public function set_as_float(string  $name, float $value):void
 	{
 		switch ($name) {
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
+		}
+	}
+	/**
+	 * @param string $name
+	 * @return float
+	 * @throws Exception
+	 */
+	public function get_as_float(string  $name):float
+	{
+		switch ($name) {
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
 	/**
@@ -185,7 +217,18 @@ class B_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	public function set_as_bool(string  $name, bool $value):void
 	{
 		switch ($name) {
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
+		}
+	}
+	/**
+	 * @param string $name
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function get_as_bool(string  $name):bool
+	{
+		switch ($name) {
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
 	/**
@@ -195,7 +238,7 @@ class B_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	public function set_as_null(string  $name):void
 	{
 		switch ($name) {
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
 	/**
@@ -207,7 +250,19 @@ class B_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	{
 		switch ($name) {
 			case 'other': $this->instance->other  = (string)$value; break;
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
+		}
+	}
+	/**
+	 * @param string $name
+	 * @return mixed
+	 * @throws Exception
+	 */
+	public function get_as_mixed(string $name)
+	{
+		switch ($name) {
+			case 'other': return $this->instance->other; break;
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
 	/**
@@ -218,9 +273,20 @@ class B_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	public function set_as_object(string $name, \Sigmalab\SimpleReflection\IReflectedObject $value):void
 	{
 		switch ($name) {
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
 		}
 	}
+
+	/**
+	 * @param string $name
+	 * @return \Sigmalab\SimpleReflection\IReflectedObject 
+	 * @throws Exception
+	 */
+	public function get_as_object(string $name):?\Sigmalab\SimpleReflection\IReflectedObject 
+	{
+return null; /* exception will be prefer , but bug. */
+	}
+
 	/**
 	 * @param string $name
 	 * @param \Sigmalab\SimpleReflection\IReflectedObject[] $value
@@ -229,7 +295,17 @@ class B_reflection implements \Sigmalab\SimpleReflection\ICanReflection
 	public function set_as_objects(string $name, array $value):void
 	{
 		switch ($name) {
-			default: throw new Exception("invalid argument");
+			default: throw new Exception("invalid argument: $name");
 		}
+	}
+
+	/**
+	 * @param string $name
+	 * @return \Sigmalab\SimpleReflection\IReflectedObject[] 
+	 * @throws Exception
+	 */
+	public function get_as_objects(string $name):array
+	{
+return []; /* exception will be prefer , but bug. */
 	}
 }
