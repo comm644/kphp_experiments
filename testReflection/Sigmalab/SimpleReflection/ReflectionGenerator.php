@@ -151,8 +151,15 @@ TEXT;
 
 TEXT;
 
+		$ref = new ReflectionClass($object);
+
 		foreach (get_object_vars($object) as $key => $value) {
 			list($decl, $isArray) = $this->getArrayItemClassName($object, $key);
+
+			$prop = $ref->getProperty($key);
+			$isNullable = $prop->getType()->allowsNull();
+
+			echo "/* $decl */\n";
 			$type = gettype($value);
 			if ($type === "integer") $type = "int";
 
@@ -161,6 +168,7 @@ TEXT;
 
 TEXT;
 
+			$getter = self::getGetter($isArray, $decl);
 			if ($isArray) {
 				switch ($decl) {
 					case 'int':
@@ -168,7 +176,6 @@ TEXT;
 					case 'string':
 					case 'bool':
 					case 'float':
-						$getter = self::getGetter($isArray, $decl);
 						echo <<<TEXT
 				if (\$value instanceof \Sigmalab\SimpleReflection\ValueScalars) {
 					\$this->instance->$key  = \$value->$getter();
@@ -197,7 +204,7 @@ TEXT;
 					case 'float':
 						echo <<<TEXT
 			if (\$value instanceof \Sigmalab\SimpleReflection\ValueScalar) {
-				\$this->instance->$key = ($type)\$value->getValue();
+				\$this->instance->$key = \$value->$getter();
 			}
 
 
@@ -312,8 +319,8 @@ TEXT;
 
 			$paramTypes = [];
 			preg_match_all('/@param\s+([A-Za-z_]+)\s*(\[\])?\s+\$([A-Za-z0-9_]+)/', $method->getDocComment(), $m);
-			foreach ($m[3] as $idx=>$paramName) {
-				$paramTypes[$paramName] = (object)["name"=>$paramName, "type"=>$m[1][$idx], "isArray"=>$m[2][$idx]=="[]" ];
+			foreach ($m[3] as $idx => $paramName) {
+				$paramTypes[$paramName] = (object)["name" => $paramName, "type" => $m[1][$idx], "isArray" => $m[2][$idx] == "[]"];
 			}
 
 			$args = [];
@@ -356,21 +363,206 @@ TEXT;
 			$arglist = implode(",", $args);
 			echo <<<TEXT
 		\$this->instance->{$method->name}($arglist);
-	}
-
 TEXT;
-
+			$this->closeFunction();
 		}
 
-		//close class;
 		echo <<<TEXT
-}
+	/**
+	 * @param string \$name
+	 * @param string \$value
+	 * @throws Exception
+	 */
+	public function set_as_string(string  \$name, string \$value):void
+	{
 
 TEXT;
+		$this->generateDirectSetSwitch($object, 'string');
+		$this->closeFunction();
 
 
+		echo <<<TEXT
+	/**
+	 * @param string \$name
+	 * @param int \$value
+	 * @throws Exception
+	 */
+	public function set_as_int(string  \$name, int \$value):void
+	{
+
+TEXT;
+		$this->generateDirectSetSwitch($object, 'integer');
+		$this->closeFunction();
+
+		echo <<<TEXT
+	/**
+	 * @param string \$name
+	 * @param float \$value
+	 * @throws Exception
+	 */
+	public function set_as_float(string  \$name, float \$value):void
+	{
+
+TEXT;
+		$this->generateDirectSetSwitch($object, 'double');
+		$this->closeFunction();
+
+
+		echo <<<TEXT
+	/**
+	 * @param string \$name
+	 * @param bool \$value
+	 * @throws Exception
+	 */
+	public function set_as_bool(string  \$name, bool \$value):void
+	{
+
+TEXT;
+		$this->generateDirectSetSwitch($object, 'boolean');
+		$this->closeFunction();
+
+		echo <<<TEXT
+	/**
+	 * @param string \$name
+	 * @throws Exception
+	 */
+	public function set_as_null(string  \$name):void
+	{
+
+TEXT;
+		$this->openSwitch();
+		$ref = new ReflectionClass($object);
+		foreach ($ref->getProperties(\ReflectionProperty::IS_PUBLIC) as $prop) {
+			$type = gettype($prop->getValue($object));
+			$key = $prop->name;
+			if (!$prop->getType()->allowsNull()) continue;
+			echo <<<TEXT
+			case '$key': \$this->instance->$key  = null; break;
+
+TEXT;
+		}
+		$this->closeSwitch();
+		$this->closeFunction();
+
+		echo <<<TEXT
+	/**
+	 * @param string \$name
+	 * @param mixed \$value
+	 * @throws Exception
+	 */
+	public function set_as_mixed(string \$name, \$value):void
+	{
+
+TEXT;
+		$this->openSwitch();
+		$ref = new ReflectionClass($object);
+		foreach ($ref->getProperties(\ReflectionProperty::IS_PUBLIC) as $prop) {
+			list($decl, $isArray) = $this->getArrayItemClassName($object, $prop->name);
+			$key = $prop->name;
+			if (!$prop->getType()->isBuiltin()) continue;
+			if ($isArray) {
+				if ($this->isScalarType($decl)) {
+					echo <<<TEXT
+			case '$key': \$this->instance->$key  = [];
+				foreach( \$value as \$arrayKey=>\$item ) {
+					\$this->instance->{$key}[\$arrayKey] = ($decl)\$item;
+				}
+				break;
+
+TEXT;
+				}
+				continue;
+			}
+
+
+			echo <<<TEXT
+			case '$key': \$this->instance->$key  = ($decl)\$value; break;
+
+TEXT;
+		}
+		$this->closeSwitch();
+		$this->closeFunction();
+
+		echo <<<TEXT
+	/**
+	 * @param string \$name
+	 * @param \Sigmalab\SimpleReflection\IReflectedObject \$value
+	 * @throws Exception
+	 */
+	public function set_as_object(string \$name, \Sigmalab\SimpleReflection\IReflectedObject \$value):void
+	{
+
+TEXT;
+		$this->openSwitch();
+		$ref = new ReflectionClass($object);
+		foreach ($ref->getProperties(\ReflectionProperty::IS_PUBLIC) as $prop) {
+			list($decl, $isArray) = $this->getArrayItemClassName($object, $prop->name);
+			$key = $prop->name;
+			if ($prop->getType()->isBuiltin()) continue;
+			if ($isArray) {
+				if ($this->isScalarType($decl)) {
+					echo <<<TEXT
+			case '$key': \$this->instance->$key  = [];
+				foreach( \$value as \$arrayKey=>\$item ) {
+					\$this->instance->{$key}[\$arrayKey] = ($decl)\$item;
+				}
+				break;
+
+TEXT;
+				}
+				continue;
+			}
+
+
+			echo <<<TEXT
+
+			case '$key': \$this->instance->$key = instance_cast(\$value, $decl::class); break;			 
+
+TEXT;
+		}
+		$this->closeSwitch();
+		$this->closeFunction();
+
+
+		echo <<<TEXT
+	/**
+	 * @param string \$name
+	 * @param \Sigmalab\SimpleReflection\IReflectedObject[] \$value
+	 * @throws Exception
+	 */
+	public function set_as_objects(string \$name, array \$value):void
+	{
+
+TEXT;
+		$this->openSwitch();
+		$ref = new ReflectionClass($object);
+		foreach ($ref->getProperties(\ReflectionProperty::IS_PUBLIC) as $prop) {
+			list($decl, $isArray) = $this->getArrayItemClassName($object, $prop->name);
+			$key = $prop->name;
+			if ($this->isScalarType($decl)) continue;
+			if ($isArray) {
+				if ($this->isScalarType($decl)) continue;
+
+				echo <<<TEXT
+			case '$key': 
+				\$this->instance->$key  = [];
+				foreach( \$value as \$arrayKey=>\$item ) {
+					\$this->instance->{$key}[\$arrayKey] = instance_cast(\$item, $decl::class); ;
+				}
+				break;
+
+TEXT;
+			}
+		}
+
+		$this->closeSwitch();
+		$this->closeFunction();
+
+
+		$this->closeClass();
 		return ob_get_clean();
 	}
+
 
 	/**
 	 * @param $isArray
@@ -407,6 +599,7 @@ TEXT;
 			}
 		}
 	}
+
 	/**
 	 * @param $isArray
 	 * @param $decl
@@ -416,23 +609,105 @@ TEXT;
 	{
 		if ($isArray) {
 			switch ($decl) {
-				case 'int': return "get_as_int";
-				case 'integer': return "get_as_int";
-				case 'string': return "get_as_string";
-				case 'bool': return "get_as_bool";
-				case 'float': return "get_as_float";
-				default: return "get_as_array";
+				case 'int':
+					return "get_as_int";
+				case 'integer':
+					return "get_as_int";
+				case 'string':
+					return "get_as_string";
+				case 'bool':
+					return "get_as_bool";
+				case 'float':
+					return "get_as_float";
+				default:
+					return "get_as_array";
 			}
 		} else {
 			switch ($decl) {
-				case 'int': return "get_as_int";
-				case 'integer': return "get_as_int";
-				case 'string': return "get_as_string";
-				case 'bool': return "get_as_bool";
-				case 'float': return "get_as_float";
-				default: return "get_as_object";
+				case 'int':
+					return "get_as_int";
+				case 'integer':
+					return "get_as_int";
+				case 'string':
+					return "get_as_string";
+				case 'bool':
+					return "get_as_bool";
+				case 'float':
+					return "get_as_float";
+				default:
+					return "get_as_object";
 			}
 		}
+	}
+
+	private function getCase(string $key)
+	{
+		echo <<<TEXT
+			case '$key': \$this->instance->$key  = \$value; break;
+
+TEXT;
+	}
+
+	private function closeSwitch()
+	{
+		echo <<<TEXT
+			default: throw new Exception("invalid argument");
+		}
+
+TEXT;
+	}
+
+	private function openSwitch()
+	{
+		echo <<<TEXT
+		switch (\$name) {
+
+TEXT;
+	}
+
+	/**
+	 * @param $object
+	 * @param string $targetType
+	 * @throws \ReflectionException
+	 */
+	private function generateDirectSetSwitch($object, string $targetType): void
+	{
+		$this->openSwitch();
+		$ref = new ReflectionClass($object);
+		foreach ($ref->getProperties(\ReflectionProperty::IS_PUBLIC) as $prop) {
+			$type = gettype($prop->getValue($object));
+			$key = $prop->name;
+
+			if ($type !== $targetType) continue;
+			$this->getCase($key);
+		}
+		$this->closeSwitch();
+	}
+
+	/**
+	 * @param $decl
+	 * @return bool
+	 */
+	private function isScalarType($decl): bool
+	{
+		return in_array($decl, ["string", "bool", "boolean", "float", "double", "int", "integer"]);
+	}
+
+	private function closeClass(): void
+	{
+//close class;
+		echo <<<TEXT
+}
+
+TEXT;
+	}
+
+	private function closeFunction(): void
+	{
+		echo <<<TEXT
+	}
+
+TEXT;
 	}
 }
 

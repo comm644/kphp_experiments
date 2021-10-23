@@ -10,6 +10,16 @@ class A implements ICanJson, IReflectedObject
 	public string  $name = "string value";
 	/** @var int */
 	public int $value = 0;
+
+	/** @var int|null  */
+	public ?int $nullableInt = null;
+
+	/** @var float  */
+	public float $floatValue = 0;
+
+	/** @var bool  */
+	public bool $boolValue = false;
+
 	/** @var int[] */
 	public array $myarray = [];
 
@@ -27,6 +37,9 @@ class A implements ICanJson, IReflectedObject
 
 	/** @var B */
 	public B  $valueB;
+
+	/** @var A */
+	public ?A  $valueA = null;
 
 	/**
 	 * A constructor.

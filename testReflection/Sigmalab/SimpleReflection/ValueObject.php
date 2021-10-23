@@ -6,33 +6,33 @@ namespace Sigmalab\SimpleReflection;
 class ValueObject extends ValueMixed
 {
 	/**
-	 * @var object|IReflectedObject
+	 * @var IReflectedObject
 	 */
-	protected object $value;
+	protected IReflectedObject $value;
 //	public TypeName $type;
 
 	/**
 	 * ObjectValue constructor.
 	 * @kphp-template $value
-	 * @param object|IReflectedObject $value
+	 * @param IReflectedObject $value
 	 */
-	public function __construct(object $value)
+	public function __construct(IReflectedObject $value)
 	{
 		$this->value = $value;
 	}
 
 	/**
-	 * @return object|IReflectedObject
+	 * @return IReflectedObject
 	 */
-	public function getValue(): object
+	public function getValue(): IReflectedObject
 	{
 		return $this->value;
 	}
 
 	/**
-	 * @return object|IReflectedObject
+	 * @return IReflectedObject
 	 */
-	public function get_as_object() : object
+	public function get_as_object() : IReflectedObject
 	{
 		return $this->value;
 	}
