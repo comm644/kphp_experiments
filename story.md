@@ -91,10 +91,11 @@ https://vkcom.github.io/kphp/kphp-language/howto-by-kphp/json-encode-decode.html
 Но в целом такой подход годится для генератора десериализатора, тогда мы экономим на ветвлениях.
 
 то есть:
+```php
 $array  = json_decode($json, true);
 $user = new User;
 User_reader::fromArray($user, $array);
-
+```
 User_reader - автогенеренный код установки полей.
 
 
@@ -131,22 +132,28 @@ https://github.com/comm644/kphp_experiments/tree/main/testGetObjectVars
 получилось вполне съедобно. 
 
 в коде включаем генеренный трейт с таблицей маппинга. (паттерн Generation Gap)
+```php
 class A
 {
   use A_refection;
 ..
+```
 
 и начинает работать магия
+```php
  $object->setPropertyValue("name", 'other value');
  $object->setPropertyValue("value", 10);
+```
 
 и
  можно делать типовой импорт
 
+```php
 $jsonArray = json_decode('{"name":"text", "value":10}', true );
 foreach($jsonArray as $key  => $value ) {
         $object->setPropertyValue((string)$key, $value );
 }
+```
 
 экспорт как обычно через instance_to_array() + json_encode($array);
 
@@ -193,13 +200,14 @@ Unknown function ->__invoke() of callable
 ## 22/10
 
 не прокатило.
-
+```php
   Handler.php:31  in Handler::invoke
     return $handler();
 
 Invalid call ...->__invoke(): $handler is not an instance or it can't be detected
 
 Unknown function ->__invoke() of callable
+```
 
 любая попытка сохранить в чем-то обработчик кроме стековой переменной приводит к такому поведению.
 
@@ -228,7 +236,7 @@ ps: хотя для рефлекшена генератор подойдет, а
 
 
 если в терминах C++   то хочется сделать боксинг до VARIABLE_TYPE который принимает всё.
-
+```cpp
 VARIABLE_TYPE  getPropertyByName( std::string name  )
 {
    if ( name == "floatValue" ) return VARIABLE_TYPE( this->floatValue );
@@ -237,7 +245,7 @@ VARIABLE_TYPE  getPropertyByName( std::string name  )
    if ( name == "valueB" ) return VARIABLE_TYPE( (void*)this->valueB );
     return null;
 }
-
+```
 
 
 ## 22/10
@@ -250,12 +258,14 @@ Cо зверским кодгеном  и  интерфейсами завелс
 * вся структура объектов должна реализовывать интерфейс поддержки рефлекшена
 * нужно явно регистрировать класс чтобы его можно было создать по имени . (статический конструктор бы..)
  
+```php 
 interface ICanReflection
 {
  public function getPropertyType(string $name): TypeName;
  public function setPropertyValue(string $name, MixedValue $value) :void;
  public function getPropertyValue(string $name) : MixedValue;
 }
+```
 
 от MixedValue наследуем варианты ObjectValue, ArrayValue, ScalarArrayValue, ScalarValue
 в реализации  ICanReflection жуткий кодген ручным  копированием массива object[] в class[] через instance_cast<>
@@ -323,8 +333,10 @@ https://github.com/comm644/kphp_experiments/blob/main/testReflection/Readme.md
 
 Сложности:
 1. В выводом типов вообще шаманство получается.  Если базового типа нет, при построении боксинга для (object) появляется единственная версия которая несовместипа с другими типами и всё ломается в сборке  на 
+```php
 error: use of deleted function
- потому что класс уже специализирован типом А , а  instance_cast<B> возвращает bool который нельзя кастануть.
+```  
+ потому что класс уже специализирован типом А , а  instance_cast< B > возвращает bool который нельзя кастануть.
 
 то есть нехватает шаблонизации объектов, того самого  "@kphp-template-class".
 
@@ -345,6 +357,7 @@ error: use of deleted function
 
 вот в коде и параметризация  по общему знаменателю или по первому аргументу
 
+  ```cpp
 struct C$ValueObject final : public C$ValueMixed {
   class_instance<C$
 IReflectedObject
@@ -354,7 +367,8 @@ IReflectedObject
   }
 ...
   };
-
+```
+  
 то есть абстрактный object (как void*) не прокатывает.
 public function __construct(object $value)
 
@@ -463,6 +477,7 @@ setPropertyValue: 17.571
 
 шаблоны:
 
+```php
 /**
  * @param $proto
  * @return object
@@ -476,21 +491,25 @@ public function get(object $proto) : T
 $instanceA = $holder->get(new A);
 $instanceB = $holder->get(new B)
 ;
+```
 
 ожидание:  создана функция по шаблону, если получаем шаблонный тип T , то все его использования должны подставиться на тип реализации шаблона
 
+```cpp
 class_instance<C$A> f$Holder$$get$A(class_instance<C$Holder> const &v$this, class_instance<C$A> const &v$proto) noexcept  {
 //62: {
 //63: return instance_cast($this->object, T::class);
   return f$instance_cast< class_instance<C$A> >(v$this->$object, v$const_string$a_key);
 }
-
+```
+  
 по факту:
 1 . результат не раскрылся
 2.  подстановка для instance_cast
  
 не раскрылась
 
+```cpp
 //source = [testTemplate.php]
 //61: public function get(object $proto) : T
 class_instance<C$T> f$Holder$$get$A(class_instance<C$Holder> const &v$this, class_instance<C$A> const &v$proto) noexcept  {
@@ -498,11 +517,13 @@ class_instance<C$T> f$Holder$$get$A(class_instance<C$Holder> const &v$this, clas
 //63: return instance_cast($this->object, T::class);
   return f$instance_cast< class_instance<C$T> >(v$this->$object, v$const_string$usf7aa15be8a7d743e);
 }
+```
 
 
 нафига: 
 Если уж шаблонный класс сделать нельзя, то хочется кастовку по образцу.
 
+```php
 /**
  * @param Holder $holder
  * @param object $class
@@ -522,7 +543,7 @@ function createArray(Holder $holder, $class): array
 
 $arrayA =  createArray($holder, new A); // expect result A[]
 $arrayB =  createArray($holder, new B); // expect result A[]
-
+```
 
 вопрос: это возможно реализовать?
 
@@ -568,6 +589,7 @@ PHP  via socket : 4.45
 
 
 TL:
+```php
 /**
  * Deserializes a server RPC request to a corresponding typed TL class.
  * NB! Works only in KPHP - not in PHP - when it is launched as RPC server!
@@ -576,7 +598,7 @@ TL:
 function rpc_server_fetch_request() {
   return null;
 }
-
+```
 
 ## 25/10
 
