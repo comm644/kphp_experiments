@@ -1,0 +1,19 @@
+{
+  "name": "node644/Sigmalab",
+  "description": "Experiments with KPHP for using Database and TemisSQL packages.",
+  "keywords": ["sql", "reflection", "kphp"],
+  "type": "library",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Alexey Vasilyev",
+      "email": "node644@gmail.com"
+    }
+  ],
+  "require": {
+    "vkcom/kphp-polyfills": "^1.0",
+    "ext-sockets": "*",
+    "ext-curl": "*",
+    "ext-pdo": "*"
+  }
+}
